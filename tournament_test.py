@@ -3,44 +3,155 @@
 # Test cases for tournament.py
 
 from tournament import *
+from Player import *
+from Match import *
+from Tourney import *
+import datetime
+
+def testDeleteAllMatches():
+    deleteAllMatches()
+    print("1. Old matches can be deleted.")
+
+def testAddPlayers():
+    deleteAllPlayers()
+    al = Player("Al")
+    al.add_to_db()
+    c = countPlayers()
+    if c != 1:
+        raise ValueError("After adding a player, countPlayers should return one.")
+    bob = Player("Bob")
+    bob.add_to_db()
+    c = countPlayers()
+    if c != 2:
+        raise ValueError("After adding a 2nd player, countPlayers should return two.")
+    print("*. Player records can be added.")
+
+def testDeletePlayers():
+    deleteAllPlayers()
+    al = Player("Al")
+    al.add_to_db()
+    print("testDeletePlayer, name, id: %s, %d" % (al.name, al.id))
+    c = countPlayers()
+    if c != 1:
+        raise ValueError("After adding a player, countPlayers should return one.")
+    bob = Player("Bob")
+    bob.add_to_db()
+    bob.delete_from_db()
+    al.delete_from_db()
+    c = countPlayers()
+    if c != 0:
+        raise ValueError("After removing the only player, countPlayers should return zero.")
+    print("*. Player records can be deleted.")
+
+def testAddTourneys():
+    deleteAllTournaments()
+    mtg1 = Tourney("MTG1", date="2015-02-23")
+    mtg1.add_to_db()
+    c = countTourneys()
+    if c != 1:
+        raise ValueError("After adding a tourney, countTourneys should return one.")
+    mtg2 = Tourney("MTG2", date="2015-02-24")
+    mtg2.add_to_db()
+    c = countTourneys()
+    if c != 2:
+        raise ValueError("After adding a 2nd tournament, countTourneys should return two.")
+    print("*. Tourneys records can be added.")
+
+def testDeleteTourneys():
+    deleteAllTournaments()
+    mtg1 = Tourney("MTG1")
+    mtg1.add_to_db()
+    c = countTourneys()
+    if c != 1:
+        raise ValueError("After adding a player, countTourneys should return one.")
+    mtg2 = Tourney("MTG2", date="2015-02-24")
+    mtg2.add_to_db()
+    mtg2.delete_from_db()
+    mtg1.delete_from_db()
+    c = countTourneys()
+    if c != 0:
+        raise ValueError("After removing the only countTourneys, countPlayers should return zero.")
+    print("*. Tourneys records can be deleted.")
+
+def testAddMatches():
+    deleteAllTournaments()
+    deleteAllPlayers()
+    mtg1 = Tourney("MTG1", date="2015-02-23")
+    mtg1.add_to_db()
+    al = Player("Al")
+    al.add_to_db()
+    bob = Player("Bob")
+    bob.add_to_db()
+    match1 = Match(player1_id=al.id, player2_id=bob.id, tourney_id=mtg1.id, round=1, player1_score=1, player2_score=0, ties=0)
+    match1.add_to_db()
+    c = countMatches()
+    if c != 1:
+        raise ValueError("After adding a match, countMatches should return one.")
+    cat = Player("Cat")
+    cat.add_to_db()
+    match2 = Match(player1_id=al.id, player2_id=cat.id, tourney_id=mtg1.id, round=1, player1_score=1, player2_score=0, ties=0)
+    match2.add_to_db()
+    c = countMatches()
+    if c != 2:
+        raise ValueError("After adding a 2nd match, countMatches should return two.")
+    print("*. Matches records can be added.")
 
 def testDeleteMatches():
-    deleteMatches()
-    print "1. Old matches can be deleted."
+    deleteAllMatches()
+    deleteAllTournaments()
+    deleteAllPlayers()
+    mtg1 = Tourney("MTG1", date="2015-02-23")
+    mtg1.add_to_db()
+    al = Player("Al")
+    al.add_to_db()
+    bob = Player("Bob")
+    bob.add_to_db()
+    match1 = Match(player1_id=al.id, player2_id=bob.id, tourney_id=mtg1.id, round=1, player1_score=1, player2_score=0, ties=0)
+    match1.add_to_db()
+    cat = Player("Cat")
+    cat.add_to_db()
+    match2 = Match(player1_id=al.id, player2_id=cat.id, tourney_id=mtg1.id, round=1, player1_score=1, player2_score=0, ties=0)
+    match2.add_to_db()
 
+    match2.delete_from_db()
+    match1.delete_from_db()
+    c = countMatches()
+    if c != 0:
+        raise ValueError("After removing the only countMatches, countPlayers should return zero.")
+    print("*. Matches records can be deleted.")
 
 def testDelete():
-    deleteMatches()
-    deletePlayers()
-    print "2. Player records can be deleted."
+    deleteAllMatches()
+    deleteAllPlayers()
+    print("2. Player and match records can be deleted.")
 
 
 def testCount():
-    deleteMatches()
-    deletePlayers()
+    deleteAllMatches()
+    deleteAllPlayers()
     c = countPlayers()
     if c == '0':
         raise TypeError(
             "countPlayers() should return numeric zero, not string '0'.")
     if c != 0:
         raise ValueError("After deleting, countPlayers should return zero.")
-    print "3. After deleting, countPlayers() returns zero."
+    print("3. After deleting, countPlayers() returns zero.")
 
 
 def testRegister():
-    deleteMatches()
-    deletePlayers()
+    deleteAllMatches()
+    deleteAllPlayers()
     registerPlayer("Chandra Nalaar")
     c = countPlayers()
     if c != 1:
         raise ValueError(
             "After one player registers, countPlayers() should be 1.")
-    print "4. After registering a player, countPlayers() returns 1."
+    print("4. After registering a player, countPlayers() returns 1.")
 
 
 def testRegisterCountDelete():
-    deleteMatches()
-    deletePlayers()
+    deleteAllMatches()
+    deleteAllPlayers()
     registerPlayer("Markov Chaney")
     registerPlayer("Joe Malik")
     registerPlayer("Mao Tsu-hsi")
@@ -49,16 +160,16 @@ def testRegisterCountDelete():
     if c != 4:
         raise ValueError(
             "After registering four players, countPlayers should be 4.")
-    deletePlayers()
+    deleteAllPlayers()
     c = countPlayers()
     if c != 0:
         raise ValueError("After deleting, countPlayers should return zero.")
-    print "5. Players can be registered and deleted."
+    print("5. Players can be registered and deleted.")
 
 
 def testStandingsBeforeMatches():
-    deleteMatches()
-    deletePlayers()
+    deleteAllMatches()
+    deleteAllPlayers()
     registerPlayer("Melpomene Murray")
     registerPlayer("Randy Schwartz")
     print(countPlayers())
@@ -77,12 +188,12 @@ def testStandingsBeforeMatches():
     if set([name1, name2]) != set(["Melpomene Murray", "Randy Schwartz"]):
         raise ValueError("Registered players' names should appear in standings, "
                          "even if they have no matches played.")
-    print "6. Newly registered players appear in the standings with no matches."
+    print("6. Newly registered players appear in the standings with no matches.")
 
 
 def testReportMatches():
-    deleteMatches()
-    deletePlayers()
+    deleteAllMatches()
+    deleteAllPlayers()
     registerPlayer("Bruno Walton")
     registerPlayer("Boots O'Neal")
     registerPlayer("Cathy Burton")
@@ -99,12 +210,12 @@ def testReportMatches():
             raise ValueError("Each match winner should have one win recorded.")
         elif i in (id2, id4) and w != 0:
             raise ValueError("Each match loser should have zero wins recorded.")
-    print "7. After a match, players have updated standings."
+    print("7. After a match, players have updated standings.")
 
 
 def testPairings():
-    deleteMatches()
-    deletePlayers()
+    deleteAllMatches()
+    deleteAllPlayers()
     registerPlayer("Twilight Sparkle")
     registerPlayer("Fluttershy")
     registerPlayer("Applejack")
@@ -123,16 +234,23 @@ def testPairings():
     if correct_pairs != actual_pairs:
         raise ValueError(
             "After one match, players with one win should be paired.")
-    print "8. After one match, players with one win are paired."
+    print("8. After one match, players with one win are paired.")
 
 
 if __name__ == '__main__':
-    testDeleteMatches()
+    testDeleteAllMatches()
     testDelete()
+    testAddPlayers()
+    testDeletePlayers()
+    testAddTourneys()
+    testDeleteTourneys()
+    testAddMatches()
+    testDeleteMatches()
+
     testCount()
     testRegister()
     testRegisterCountDelete()
     testStandingsBeforeMatches()
     testReportMatches()
     testPairings()
-    print "Success!  All tests pass!"
+    print("Success!  All tests pass!")
