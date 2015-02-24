@@ -13,13 +13,13 @@
 
 CREATE TABLE player (
 id SERIAL PRIMARY KEY,
-name           TEXT    NOT NULL,
+name           TEXT    UNIQUE NOT NULL,
 initial_points  INT
 );
 
 CREATE TABLE tourney (
 id SERIAL PRIMARY KEY     NOT NULL,
-name           TEXT    NOT NULL,
+name           TEXT   UNIQUE NOT NULL,
 tourney_date 	DATE     NOT NULL,
 location  TEXT
 );
@@ -28,6 +28,13 @@ CREATE TABLE match (
 player1_id  INT references player(id) NOT NULL,
 player2_id 	INT references player(id),
 tourney_id INT references tourney(id),
+round INT,
 player1_score INT,
-player2_score INT
+player2_score INT,
+ties INT
+);
+
+CREATE TABLE tournament_player (
+tournament_id INT references tourney(id) NOT NULL,
+player_id INT references player(id) NOT NULL
 );

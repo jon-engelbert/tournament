@@ -4,7 +4,7 @@
 #
 
 import psycopg2
-from Player import *
+from player import *
 
 
 def connect():

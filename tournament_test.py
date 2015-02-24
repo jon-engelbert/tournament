@@ -3,9 +3,9 @@
 # Test cases for tournament.py
 
 from tournament import *
-from Player import *
-from Match import *
-from Tourney import *
+from player import *
+from match import *
+from tourney import *
 import datetime
 
 def testDeleteAllMatches():
