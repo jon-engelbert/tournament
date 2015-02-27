@@ -3,16 +3,34 @@
 # Test cases for tournament.py
 
 from tournament import *
-from player import *
-from match import *
-from tourney import *
+from Player import *
+from Match import *
+from Tourney import *
 import datetime
 
 def testDeleteAllMatches():
+    deleteAllTournamentPlayers()
     deleteAllMatches()
     print("1. Old matches can be deleted.")
 
+def testRegisterPlayerForTourney():
+    deleteAllTournamentPlayers()
+    deleteAllPlayers()
+    deleteAllTournaments()
+    al = Player("Al")
+    al.add_to_db()
+    bob = Player("Bob")
+    bob.add_to_db()
+    mtg1 = Tourney("MTG1", date="2015-02-23")
+    mtg1.add_to_db()
+    registerPlayerForTourney(al, mtg1)
+    registerPlayerForTourney(bob, mtg1)
+    players = selectPlayersInTourney(mtg1)
+    assert(len(players) == 2)
+
+
 def testAddPlayers():
+    deleteAllTournamentPlayers()
     deleteAllPlayers()
     al = Player("Al")
     al.add_to_db()
@@ -27,6 +45,7 @@ def testAddPlayers():
     print("*. Player records can be added.")
 
 def testDeletePlayers():
+    deleteAllTournamentPlayers()
     deleteAllPlayers()
     al = Player("Al")
     al.add_to_db()
@@ -44,6 +63,7 @@ def testDeletePlayers():
     print("*. Player records can be deleted.")
 
 def testAddTourneys():
+    deleteAllTournamentPlayers()
     deleteAllTournaments()
     mtg1 = Tourney("MTG1", date="2015-02-23")
     mtg1.add_to_db()
@@ -58,6 +78,7 @@ def testAddTourneys():
     print("*. Tourneys records can be added.")
 
 def testDeleteTourneys():
+    deleteAllTournamentPlayers()
     deleteAllTournaments()
     mtg1 = Tourney("MTG1")
     mtg1.add_to_db()
@@ -74,6 +95,7 @@ def testDeleteTourneys():
     print("*. Tourneys records can be deleted.")
 
 def testAddMatches():
+    deleteAllTournamentPlayers()
     deleteAllTournaments()
     deleteAllPlayers()
     mtg1 = Tourney("MTG1", date="2015-02-23")
@@ -97,6 +119,7 @@ def testAddMatches():
     print("*. Matches records can be added.")
 
 def testDeleteMatches():
+    deleteAllTournamentPlayers()
     deleteAllMatches()
     deleteAllTournaments()
     deleteAllPlayers()
@@ -121,12 +144,14 @@ def testDeleteMatches():
     print("*. Matches records can be deleted.")
 
 def testDelete():
+    deleteAllTournamentPlayers()
     deleteAllMatches()
     deleteAllPlayers()
     print("2. Player and match records can be deleted.")
 
 
 def testCount():
+    deleteAllTournamentPlayers()
     deleteAllMatches()
     deleteAllPlayers()
     c = countPlayers()
@@ -139,6 +164,7 @@ def testCount():
 
 
 def testRegister():
+    deleteAllTournamentPlayers()
     deleteAllMatches()
     deleteAllPlayers()
     registerPlayer("Chandra Nalaar")
@@ -150,6 +176,7 @@ def testRegister():
 
 
 def testRegisterCountDelete():
+    deleteAllTournamentPlayers()
     deleteAllMatches()
     deleteAllPlayers()
     registerPlayer("Markov Chaney")
@@ -168,6 +195,7 @@ def testRegisterCountDelete():
 
 
 def testStandingsBeforeMatches():
+    deleteAllTournamentPlayers()
     deleteAllMatches()
     deleteAllPlayers()
     registerPlayer("Melpomene Murray")
@@ -192,6 +220,7 @@ def testStandingsBeforeMatches():
 
 
 def testReportMatches():
+    deleteAllTournamentPlayers()
     deleteAllMatches()
     deleteAllPlayers()
     registerPlayer("Bruno Walton")
@@ -212,8 +241,38 @@ def testReportMatches():
             raise ValueError("Each match loser should have zero wins recorded.")
     print("7. After a match, players have updated standings.")
 
+def testReportMatchesNew():
+    deleteAllTournamentPlayers()
+    deleteAllMatches()
+    deleteAllPlayers()
+    deleteAllTournaments()
+    mtg1 = Tourney("MTG1", date="2015-02-23")
+    mtg1.add_to_db()
+    registerPlayer("Bruno Walton")
+    registerPlayer("Boots O'Neal")
+    registerPlayer("Cathy Burton")
+    registerPlayer("Diane Grant")
+    registerPlayerForTourney("Bruno Walton", mtg1)
+    registerPlayerForTourney("Boots O'Neal", mtg1)
+    registerPlayerForTourney("Cathy Burton", mtg1)
+    registerPlayerForTourney("Diane Grant", mtg1)
+    standings = playerStandingsForTourney(mtg1)
+    [id1, id2, id3, id4] = [row[0] for row in standings]
+    reportMatch(id1, id2)
+    reportMatch(id3, id4)
+    standings = playerStandings()
+    for (i, n, w, m) in standings:
+        if m != 1:
+            raise ValueError("Each player should have one match recorded.")
+        if i in (id1, id3) and w != 1:
+            raise ValueError("Each match winner should have one win recorded.")
+        elif i in (id2, id4) and w != 0:
+            raise ValueError("Each match loser should have zero wins recorded.")
+    print("7. After a match, players have updated standings.")
+
 
 def testPairings():
+    deleteAllTournamentPlayers()
     deleteAllMatches()
     deleteAllPlayers()
     registerPlayer("Twilight Sparkle")
@@ -246,6 +305,7 @@ if __name__ == '__main__':
     testDeleteTourneys()
     testAddMatches()
     testDeleteMatches()
+    testRegisterPlayerForTourney()
 
     testCount()
     testRegister()

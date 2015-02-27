@@ -33,3 +33,16 @@ class Player:
         self.id = cursor.fetchone()[0]
         conn.close()
         return
+    @classmethod
+    def Create(id):
+        conn = tournament.connect()
+        cursor = conn.cursor()
+        statement = "SELECT name, initcount FROM  player WHERE id = %"
+        data = (id)
+        cursor.execute(statement, data)
+        conn.commit()
+        params = cursor.fetchone()
+        player = self(params[0], params[1])
+        player.id = id
+        conn.close()
+        return player

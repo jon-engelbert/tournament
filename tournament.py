@@ -4,7 +4,7 @@
 #
 
 import psycopg2
-from player import *
+from Player import *
 
 
 def connect():
@@ -21,20 +21,17 @@ def registerPlayer(name):
     player = Player(name)
     player.add_to_db()
 
-def registerPlayerForTourney(player, tourney):
-    """Adds a player to a tournament.
-    Args:
-      player: the player object instance,
-      tourney: the tournament object instance.
-    """
-    conn = tournament.connect()
+
+def selectPlayersInTourney(tourney):
+    conn = connect()
     cursor = conn.cursor()
-    statement = "INSERT INTO  tournament_player (player_id, tournament_id) VALUES (%s %s)"
-    data = (player.id, tourney.id)
+    statement = "SELECT * FROM  tournament_player WHERE tournament_id = %s"
+    data = (tourney.id,)
     cursor.execute(statement, data)
+    player_ids = cursor.fetchall()
     conn.commit()
     conn.close()
-    return
+    return [Player(player_id) for player_id in player_ids]
 
 
 
@@ -48,6 +45,15 @@ def deleteAllMatches():
     conn.close()
 
 
+
+def deleteAllTournamentPlayers():
+    """Remove all the player records from the database."""
+    conn = connect()
+    cursor = conn.cursor()
+    statement = "DELETE FROM tournament_player"
+    cursor.execute(statement)
+    conn.commit()
+    conn.close()
 
 def deleteAllPlayers():
     """Remove all the player records from the database."""
@@ -68,7 +74,7 @@ def deleteAllTournaments():
     conn.close()
 
 
-def registerPlayerForTourney(player, tournament):
+def registerPlayerForTourney(player, tourney):
     """Adds a player to the tournament database.
     The database assigns a unique serial id number for the player.  (This
     should be handled by your SQL database schema, not in your Python code.)
@@ -77,7 +83,7 @@ def registerPlayerForTourney(player, tournament):
     """
     conn = connect()
     cursor = conn.cursor()
-    statement = "INSERT INTO  tournament_players (player_id, tournament_id) VALUES (%s)"
+    statement = "INSERT INTO  tournament_player (player_id, tournament_id) VALUES (%s, %s)"
     data = (player.id, tourney.id)
     cursor.execute(statement, data)
     conn.commit()
@@ -163,6 +169,21 @@ def playerStandings():
 
 
 def reportMatch(winner, loser):
+    """Records the outcome of a single match between two players.
+
+    Args:
+      winner:  the id number of the player who won
+      loser:  the id number of the player who lost
+    """
+    conn = connect()
+    cursor = conn.cursor()
+    statement = "INSERT INTO  match (player1_id, player2_id, player1_score, player2_score) VALUES (%s, %s, %s, %s)"
+    data = (winner, loser, 1, 0)
+    cursor.execute(statement, data)
+    conn.commit()
+    conn.close()
+
+def reportMatchNew(tourney, player1, player2, wins1, wins2, ties):
     """Records the outcome of a single match between two players.
 
     Args:
