@@ -6,6 +6,7 @@
 import psycopg2
 import random
 from Player import *
+import Tourney
 
 
 def connect():
@@ -102,7 +103,6 @@ def countPlayers():
         count = result[0]
     else:
         count = 0
-    print("count: %d" % count)
     return count
 
 def countTourneys():
@@ -117,7 +117,6 @@ def countTourneys():
         count = result[0]
     else:
         count = 0
-    print("count: %d" % count)
     return count
 
 def countMatches():
@@ -132,9 +131,7 @@ def countMatches():
         count = result[0]
     else:
         count = 0
-    print("count: %d" % count)
     return count
-
 
 def playerStandingsWithTies(tourney):
     """Returns a list of the players and their win records, sorted by wins.
@@ -149,7 +146,6 @@ def playerStandingsWithTies(tourney):
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
-    print("about to calculate playerStandingsWithTies")
     conn = connect()
     cursor = conn.cursor()
     statementA = "Create View winner As " \
@@ -177,8 +173,6 @@ def playerStandingsWithTies(tourney):
                 "group by ties1.id, ties2.id, ties1.name, ties2.name, ties1.ties, ties2.ties order by ties1.name"
     cursor.execute(statement)
     ties = cursor.fetchall()
-    print(win_loss)
-    print(ties)
     statement = "Create View ties As " \
                 "Select COALESCE(ties1.id, ties2.id) as id, COALESCE(ties1.name, ties2.name) as name, COALESCE(ties1.ties, 0) + COALESCE(ties2.ties, 0) as ties from ties1 FULL OUTER JOIN ties2  ON (ties1.id = ties2.id)" \
                 "group by ties1.id, ties2.id, ties1.name, ties2.name, ties1.ties, ties2.ties order by ties1.name"
@@ -190,7 +184,6 @@ def playerStandingsWithTies(tourney):
     statement =  "Select COALESCE(winloss.id, ties.id) as id, COALESCE(winloss.name, ties.name) as name, COALESCE(winloss.match_wins, 0), COALESCE(winloss.match_losses, 0), COALESCE(ties.ties, 0) from winloss FULL OUTER JOIN ties on (winloss.id = ties.id)"
     cursor.execute(statement, data)
     results = cursor.fetchall()
-    print("results %s" % results)
 
 
     # statement =  "Select player.id as id, player.name as name, count(match.player1_score) as match_wins, sum(match.player1_score) as game_wins " \
@@ -244,8 +237,6 @@ def playerStandings():
     statement = "Select winner.id, winner.name, winner.wins, winner.wins + loser.losses from winner left join loser on (winner.id = loser.id) group by winner.id, winner.name, winner.wins, loser.losses order by winner.wins DESC"
     cursor.execute(statement)
     results = cursor.fetchall()
-    for res_id, res_name, res_wins, res_total in results:
-        print("winner: %s, wins: %s, total: %s" % (res_name, res_wins, res_total))
     return results
 
 
@@ -303,7 +294,6 @@ def swissPairings():
         else:
             pair += (player_id, name)
             pairs.append(pair)
-        print (pairs)
         i += 1
     return pairs
 
@@ -329,6 +319,7 @@ def winPercentage(record):
     :return: 2 points per win, one point per tie, for total points, divide by 2* total games.
     """
     return (2 * record[2] + record[4]) / ( 2* (record[2] + record[3] + record[4]))
+
 
 def swissPairingsWithByes(tourney):
     """Returns a list of pairs of players for the next round of a match.
@@ -357,8 +348,10 @@ def swissPairingsWithByes(tourney):
     pairs = []
     if max_played == 0:
         random.shuffle(standings)
+        print("first round %s" % standings)
     else:
         standings = sorted(standings, key = totalPoints)
+        print("late round %s" % standings)
     for player in standings:
         if (not use_bye or (player[0] != player_bye_id)):
             if i % 2 == 0:
@@ -366,6 +359,6 @@ def swissPairingsWithByes(tourney):
             else:
                 pair += (player[0], player[1])
                 pairs.append(pair)
-        print (pairs)
+            print (pairs)
         i += 1
     return pairs

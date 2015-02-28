@@ -433,8 +433,60 @@ def testPairingsWithByesTies():
     """ pairings don't matter, ties all around"""
     print("8a. After one match, pairings don't matter, ties all around.")
 
+def testActualTourney():
+    deleteAllTournamentPlayers()
+    deleteAllMatches()
+    deleteAllPlayers()
+    deleteAllTournaments()
+    mtg1 = Tourney("MTG1", date="2015-02-23")
+    mtg1.add_to_db()
+
+    p = []
+    p.append(Player("p0"))
+    p[0].add_to_db()
+    p.append(Player("p1"))
+    p[1].add_to_db()
+    p.append(Player("p2"))
+    p[2].add_to_db()
+    p.append(Player("p3"))
+    p[3].add_to_db()
+    p.append(Player("p4"))
+    p[4].add_to_db()
+    for i in range(5):
+        mtg1.registerPlayer(p[i])
+        print(p[i])
+    pairs = Tourney.initialPairingsWithByes(mtg1)
+    print ("Pairs[0]: ")
+    print(pairs[0])
+    print ("Pairs[1]: ")
+    print(pairs[1])
+    match1 = Match(round = 1, player1_id=pairs[0][0], player2_id=pairs[0][1], tourney_id=mtg1.id,  player1_score=1, player2_score=1, ties=0)
+    match1.add_to_db()
+    match2 = Match(round = 1, player1_id=pairs[1][0], player2_id=pairs[1][1], tourney_id=mtg1.id,  player1_score=1, player2_score=1, ties=1)
+    match2.add_to_db()
+    pairs = swissPairingsWithByes(mtg1)
+    print ("later Pairs[0]: ")
+    print(pairs[0])
+    print ("later Pairs[1]: ")
+    print(pairs[1])
+    match3 = Match(round = 2, player1_id=pairs[0][0], player2_id=pairs[0][2], tourney_id=mtg1.id,  player1_score=0, player2_score=0, ties=3)
+    match3.add_to_db()
+    match4 = Match(round = 2, player1_id=pairs[1][0], player2_id=pairs[1][2], tourney_id=mtg1.id,  player1_score=1, player2_score=1, ties=2)
+    match4.add_to_db()
+    standings = playerStandingsWithTies(mtg1)
+    pairings = swissPairingsWithByes(mtg1)
+    if len(pairings) != 2:
+        raise ValueError(
+            "For four players, swissPairings should return two pairs.")
+    [(pid1, pname1, pid2, pname2), (pid3, pname3, pid4, pname4)] = pairings
+    #correct_pairs = set([frozenset([al.id, bob.id]), frozenset([cat.id, dee.id])])
+    #actual_pairs = set([frozenset([pid1, pid2]), frozenset([pid3, pid4])])
+    """ pairings don't matter, ties all around"""
+    print("8a. After one match, pairings don't matter, ties all around.")
+
 
 if __name__ == '__main__':
+    testActualTourney()
     testReportMatchesAllTies()
     testReportMatchesOneTie()
     testPairingsOneTie()
