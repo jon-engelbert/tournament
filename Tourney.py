@@ -35,3 +35,12 @@ class Tourney:
         self.id = cursor.fetchone()[0]
         conn.close()
         return
+
+    def registerPlayer(self, player):
+        conn = tournament.connect()
+        cursor = conn.cursor()
+        statement = "INSERT INTO  tournament_player (player_id, tournament_id) VALUES (%s, %s)"
+        data = (player.id, self.id)
+        cursor.execute(statement, data)
+        conn.commit()
+        conn.close()

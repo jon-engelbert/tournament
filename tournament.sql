@@ -14,7 +14,7 @@
 CREATE TABLE player (
 id SERIAL PRIMARY KEY,
 name           TEXT    UNIQUE NOT NULL,
-initial_points  INT
+rating  FLOAT
 );
 
 CREATE TABLE tourney (

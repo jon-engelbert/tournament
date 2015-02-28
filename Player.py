@@ -2,9 +2,9 @@ __author__ = 'jonengelbert'
 import tournament
 
 class Player:
-    def __init__(self, name, initcount = 0):
+    def __init__(self, name, initRating = 0.5):
         self.name = name
-        self.initcount = initcount
+        self.rating = initRating
         self.id = None
 
     def delete_from_db(self):

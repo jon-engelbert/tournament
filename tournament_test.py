@@ -241,35 +241,133 @@ def testReportMatches():
             raise ValueError("Each match loser should have zero wins recorded.")
     print("7. After a match, players have updated standings.")
 
-def testReportMatchesNew():
+def testReportMatchesOneTie():
     deleteAllTournamentPlayers()
     deleteAllMatches()
     deleteAllPlayers()
     deleteAllTournaments()
     mtg1 = Tourney("MTG1", date="2015-02-23")
     mtg1.add_to_db()
-    registerPlayer("Bruno Walton")
-    registerPlayer("Boots O'Neal")
-    registerPlayer("Cathy Burton")
-    registerPlayer("Diane Grant")
-    registerPlayerForTourney("Bruno Walton", mtg1)
-    registerPlayerForTourney("Boots O'Neal", mtg1)
-    registerPlayerForTourney("Cathy Burton", mtg1)
-    registerPlayerForTourney("Diane Grant", mtg1)
-    standings = playerStandingsForTourney(mtg1)
-    [id1, id2, id3, id4] = [row[0] for row in standings]
-    reportMatch(id1, id2)
-    reportMatch(id3, id4)
-    standings = playerStandings()
-    for (i, n, w, m) in standings:
-        if m != 1:
-            raise ValueError("Each player should have one match recorded.")
-        if i in (id1, id3) and w != 1:
-            raise ValueError("Each match winner should have one win recorded.")
-        elif i in (id2, id4) and w != 0:
-            raise ValueError("Each match loser should have zero wins recorded.")
+
+    al = Player("Al")
+    al.add_to_db()
+    bob = Player("Bob")
+    bob.add_to_db()
+    cat = Player("Cat")
+    cat.add_to_db()
+    dee = Player("Dee")
+    dee.add_to_db()
+    mtg1.registerPlayer(al)
+    mtg1.registerPlayer(bob)
+    mtg1.registerPlayer(cat)
+    mtg1.registerPlayer(dee)
+    match1 = Match(round = 1, player1_id=al.id, player2_id=bob.id, tourney_id=mtg1.id,  player1_score=2, player2_score=1, ties=0)
+    match1.add_to_db()
+    match2 = Match(round = 1, player1_id=cat.id, player2_id=dee.id, tourney_id=mtg1.id,  player1_score=1, player2_score=1, ties=1)
+    match2.add_to_db()
+
+    match3 = Match(round = 2, player1_id=al.id, player2_id=cat.id, tourney_id=mtg1.id,  player1_score=2, player2_score=0, ties=1)
+    match3.add_to_db()
+    match4 = Match(round = 2, player1_id=bob.id, player2_id=dee.id, tourney_id=mtg1.id,  player1_score=1, player2_score=0, ties=2)
+    match4.add_to_db()
+    standings = playerStandingsWithTies(mtg1)
+    for (i, n, w, l, t) in standings:
+        m = w + l + t
+        if m != 2:
+            raise ValueError("Each player should have 2 match recorded.")
+        if  al.id == i and (w != 2 or l != 0 or t != 0):
+            raise ValueError("Al should have two wins.")
+        elif bob.id == i and (w != 1 or l != 1 or t != 0):
+            raise ValueError("bob should be 1, 0, 1.")
+        elif cat.id == i and (w != 0 or l != 1 or t != 1):
+            raise ValueError("cat should be 0,1, 1.")
+        elif dee.id == i and (w != 0 or l != 1 or t != 1):
+            raise ValueError("cat should be 0,1, 1.")
     print("7. After a match, players have updated standings.")
 
+def testReportMatchesAllTies():
+    deleteAllTournamentPlayers()
+    deleteAllMatches()
+    deleteAllPlayers()
+    deleteAllTournaments()
+    mtg1 = Tourney("MTG1", date="2015-02-23")
+    mtg1.add_to_db()
+
+    al = Player("Al")
+    al.add_to_db()
+    bob = Player("Bob")
+    bob.add_to_db()
+    cat = Player("Cat")
+    cat.add_to_db()
+    dee = Player("Dee")
+    dee.add_to_db()
+    mtg1.registerPlayer(al)
+    mtg1.registerPlayer(bob)
+    mtg1.registerPlayer(cat)
+    mtg1.registerPlayer(dee)
+    match1 = Match(round = 1, player1_id=al.id, player2_id=bob.id, tourney_id=mtg1.id,  player1_score=1, player2_score=1, ties=0)
+    match1.add_to_db()
+    match2 = Match(round = 1, player1_id=cat.id, player2_id=dee.id, tourney_id=mtg1.id,  player1_score=1, player2_score=1, ties=1)
+    match2.add_to_db()
+
+    match3 = Match(round = 2, player1_id=al.id, player2_id=cat.id, tourney_id=mtg1.id,  player1_score=0, player2_score=0, ties=3)
+    match3.add_to_db()
+    match4 = Match(round = 2, player1_id=bob.id, player2_id=dee.id, tourney_id=mtg1.id,  player1_score=1, player2_score=1, ties=2)
+    match4.add_to_db()
+    standings = playerStandingsWithTies(mtg1)
+    for (i, n, w, l, t) in standings:
+        m = w + l + t
+        if m != 2:
+            raise ValueError("Each player should have 2 match recorded.")
+        if  w != 0:
+            raise ValueError("Each match winner should have one win recorded.")
+        elif l != 0:
+            raise ValueError("Each match loser should have zero wins recorded.")
+        elif t != 2:
+            raise ValueError("Each match loser should have two ties recorded.")
+    print("7-ties. After a match, players have updated standings.")
+
+def testPairingsOneTie():
+    deleteAllTournamentPlayers()
+    deleteAllMatches()
+    deleteAllPlayers()
+    deleteAllTournaments()
+    mtg1 = Tourney("MTG1", date="2015-02-23")
+    mtg1.add_to_db()
+
+    al = Player("Al")
+    al.add_to_db()
+    bob = Player("Bob")
+    bob.add_to_db()
+    cat = Player("Cat")
+    cat.add_to_db()
+    dee = Player("Dee")
+    dee.add_to_db()
+    mtg1.registerPlayer(al)
+    mtg1.registerPlayer(bob)
+    mtg1.registerPlayer(cat)
+    mtg1.registerPlayer(dee)
+    match1 = Match(round = 1, player1_id=al.id, player2_id=bob.id, tourney_id=mtg1.id,  player1_score=2, player2_score=1, ties=0)
+    match1.add_to_db()
+    match2 = Match(round = 1, player1_id=cat.id, player2_id=dee.id, tourney_id=mtg1.id,  player1_score=1, player2_score=1, ties=1)
+    match2.add_to_db()
+
+    match3 = Match(round = 2, player1_id=al.id, player2_id=cat.id, tourney_id=mtg1.id,  player1_score=2, player2_score=0, ties=1)
+    match3.add_to_db()
+    match4 = Match(round = 2, player1_id=bob.id, player2_id=dee.id, tourney_id=mtg1.id,  player1_score=1, player2_score=0, ties=2)
+    match4.add_to_db()
+    standings = playerStandingsWithTies(mtg1)
+    pairings = swissPairingsWithByes(mtg1)
+    if len(pairings) != 2:
+        raise ValueError(
+            "For four players, swissPairings should return two pairs.")
+    [(pid1, pname1, pid2, pname2), (pid3, pname3, pid4, pname4)] = pairings
+    correct_pairs = set([frozenset([al.id, bob.id]), frozenset([cat.id, dee.id])])
+    actual_pairs = set([frozenset([pid1, pid2]), frozenset([pid3, pid4])])
+    if correct_pairs != actual_pairs:
+        raise ValueError(
+            "After two match, players with one win should be paired.")
+    print("8b. After two match, pairings are correct.")
 
 def testPairings():
     deleteAllTournamentPlayers()
@@ -295,8 +393,52 @@ def testPairings():
             "After one match, players with one win should be paired.")
     print("8. After one match, players with one win are paired.")
 
+def testPairingsWithByesTies():
+    deleteAllTournamentPlayers()
+    deleteAllMatches()
+    deleteAllPlayers()
+    deleteAllTournaments()
+    mtg1 = Tourney("MTG1", date="2015-02-23")
+    mtg1.add_to_db()
+
+    al = Player("Al", )
+    al.add_to_db()
+    bob = Player("Bob")
+    bob.add_to_db()
+    cat = Player("Cat")
+    cat.add_to_db()
+    dee = Player("Dee")
+    dee.add_to_db()
+    mtg1.registerPlayer(al)
+    mtg1.registerPlayer(bob)
+    mtg1.registerPlayer(cat)
+    mtg1.registerPlayer(dee)
+    match1 = Match(round = 1, player1_id=al.id, player2_id=bob.id, tourney_id=mtg1.id,  player1_score=1, player2_score=1, ties=0)
+    match1.add_to_db()
+    match2 = Match(round = 1, player1_id=cat.id, player2_id=dee.id, tourney_id=mtg1.id,  player1_score=1, player2_score=1, ties=1)
+    match2.add_to_db()
+
+    match3 = Match(round = 2, player1_id=al.id, player2_id=cat.id, tourney_id=mtg1.id,  player1_score=0, player2_score=0, ties=3)
+    match3.add_to_db()
+    match4 = Match(round = 2, player1_id=bob.id, player2_id=dee.id, tourney_id=mtg1.id,  player1_score=1, player2_score=1, ties=2)
+    match4.add_to_db()
+    standings = playerStandingsWithTies(mtg1)
+    pairings = swissPairingsWithByes(mtg1)
+    if len(pairings) != 2:
+        raise ValueError(
+            "For four players, swissPairings should return two pairs.")
+    [(pid1, pname1, pid2, pname2), (pid3, pname3, pid4, pname4)] = pairings
+    correct_pairs = set([frozenset([al.id, bob.id]), frozenset([cat.id, dee.id])])
+    actual_pairs = set([frozenset([pid1, pid2]), frozenset([pid3, pid4])])
+    """ pairings don't matter, ties all around"""
+    print("8a. After one match, pairings don't matter, ties all around.")
+
 
 if __name__ == '__main__':
+    testReportMatchesAllTies()
+    testReportMatchesOneTie()
+    testPairingsOneTie()
+    testPairingsWithByesTies()
     testDeleteAllMatches()
     testDelete()
     testAddPlayers()
