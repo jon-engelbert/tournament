@@ -9,7 +9,6 @@ class Player:
 
     def delete_from_db(self):
         """Remove all the player records from the database."""
-        print("delete_from_id, name, id: %s %d" % (self.name, self.id))
         conn = tournament.connect()
         cursor = conn.cursor()
         statement = "DELETE FROM player WHERE id = %d" % self.id
@@ -46,3 +45,15 @@ class Player:
         player.id = id
         conn.close()
         return player
+
+    @classmethod
+    def all(self, tourney_id):
+        conn = tournament.connect()
+        cursor = conn.cursor()
+        statement = "SELECT tournament_player.player_id as id, player.name as name FROM  tournament_player JOIN player ON (tournament_player.player_id = player.id) WHERE tournament_id = %s"
+        data = (tourney_id,)
+        cursor.execute(statement, data)
+        conn.commit()
+        players = cursor.fetchall()
+        conn.close()
+        return [(player[0], player[1]) for player in players]
